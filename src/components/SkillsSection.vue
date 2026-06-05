@@ -1,27 +1,19 @@
 <script setup>
-import { ref, inject, computed } from 'vue'
+import { ref } from 'vue'
+import { useI18n } from '../composables/useI18n.js'
+import { useScrollReveal } from '../composables/useScrollReveal.js'
 
-const lang = inject('lang')
-
-const textos = {
-  es: { titulo: 'Tecnologías' },
-  en: { titulo: 'Technologies' }
-}
-const t = computed(() => textos[lang.value])
-
-// Recibe ambas props — habilidades se mantiene por compatibilidad con el JSON
-// tecnologias es el nuevo array de iconos
 defineProps({
-  
-  tecnologias:  { type: Array, default: () => [] }
+  tecnologias: { type: Array, default: () => [] }
 })
 
-// Zona activa del dock — índice de la tecnología sobre la que está el cursor
-// -1 significa que ninguna está activa
+const { t } = useI18n('skills')
+const { target: seccionRef, isRevealed } = useScrollReveal({ threshold: 0.1 })
+
+// Índice de la tecnología bajo el cursor; -1 = ninguna activa.
 const activo = ref(-1)
 
-// Calcula el "lerp" (interpolación) de cada item según distancia al activo
-// Igual al efecto del código de ejemplo: items cercanos crecen menos
+// Escala cada item según su distancia al activo (efecto dock).
 function getLerp(index) {
   if (activo.value === -1) return 0
   const distancia = Math.abs(index - activo.value)
@@ -31,14 +23,14 @@ function getLerp(index) {
 </script>
 
 <template>
-  <section id="habilidades" class="section">
+  <section id="habilidades" class="section" ref="seccionRef">
     <div class="container">
 
       <h2 class="section-title">{{ t.titulo }}</h2>
 
       <!-- Dock de tecnologías con efecto de expansión -->
       <!-- @mouseleave del contenedor resetea el activo -->
-      <div class="dock-wrapper" @mouseleave="activo = -1">
+      <div class="dock-wrapper reveal-item" :class="{ active: isRevealed }" @mouseleave="activo = -1">
         <nav class="dock" aria-label="Tecnologías">
 
           <!--
@@ -74,6 +66,17 @@ function getLerp(index) {
   display: flex;
   justify-content: center;
   padding-block: 3rem;
+}
+
+/* Entrada al hacer scroll */
+.reveal-item {
+  opacity: 0;
+  transform: translateY(1.75rem);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal-item.active {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Contenedor del dock — fila flex que se adapta con flex-wrap */
@@ -134,6 +137,18 @@ function getLerp(index) {
   transition: font-size 0.2s ease;
   line-height: 1;
 }
+/* Pop al pasar el cursor (spinning icon) */
+.dock-item:hover .dock-icono i {
+  animation: icon-pop 0.4s ease;
+}
+@keyframes icon-pop {
+  0%   { transform: scale(1) rotate(0); }
+  50%  { transform: scale(1.2) rotate(-8deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dock-item:hover .dock-icono i { animation: none; }
+}
 
 /* Tooltip con el nombre */
 .dock-label {
@@ -163,8 +178,8 @@ function getLerp(index) {
   }
 
   .dock-item {
-    width:  calc(2.5rem + var(--lerp, 0) * 1.5rem);
-    height: calc(2.5rem + var(--lerp, 0) * 1.5rem);
+    width:  calc(2.75rem + var(--lerp, 0) * 1.5rem);
+    height: calc(2.75rem + var(--lerp, 0) * 1.5rem);
   }
 }
 </style>
