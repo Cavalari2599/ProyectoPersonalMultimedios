@@ -1,9 +1,9 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from '../composables/useI18n.js'
 import { useScrollReveal } from '../composables/useScrollReveal.js'
 
-defineProps({
+const props = defineProps({
   proyectos: { type: Array, default: () => [] },
   cargando: { type: Boolean, default: false },
 })
@@ -12,6 +12,18 @@ const { locale, t } = useI18n('gallery')
 const { target: seccionRef, isRevealed } = useScrollReveal({ threshold: 0.1 })
 
 const SKELETON_COUNT = 3
+
+// ── Filtro por categoría ──────────────────────────────────────
+const TODAS = 'todas'
+const categoriaActiva = ref(TODAS)
+
+const categorias = computed(() => [...new Set(props.proyectos.map((p) => p.categoria))])
+
+const proyectosFiltrados = computed(() =>
+  categoriaActiva.value === TODAS
+    ? props.proyectos
+    : props.proyectos.filter((p) => p.categoria === categoriaActiva.value),
+)
 
 // ── Imágenes de proyecto (drop-in) ────────────────────────────
 // Coloca el archivo en src/assets/images/ y su nombre en portfolio.json
@@ -38,6 +50,26 @@ function onImgError(id) {
     <div class="container">
       <h2 class="section-title">{{ t.titulo }}</h2>
 
+      <!-- Filtro por categoría: <search> envuelve el control de filtrado -->
+      <search v-if="categorias.length > 1" class="filtros">
+        <button
+          type="button"
+          class="filtro"
+          :class="{ activo: categoriaActiva === TODAS }"
+          :aria-pressed="categoriaActiva === TODAS"
+          @click="categoriaActiva = TODAS"
+        >{{ t.todas }}</button>
+        <button
+          v-for="categoria in categorias"
+          :key="categoria"
+          type="button"
+          class="filtro"
+          :class="{ activo: categoriaActiva === categoria }"
+          :aria-pressed="categoriaActiva === categoria"
+          @click="categoriaActiva = categoria"
+        >{{ categoria }}</button>
+      </search>
+
       <!-- Grid auto-fill: responsive sin media query extra -->
       <div class="galeria-grid">
 
@@ -55,7 +87,7 @@ function onImgError(id) {
         <!-- Tarjetas con volteo 3D (flip) accesibles por teclado -->
         <template v-else>
         <article
-          v-for="(proyecto, index) in proyectos"
+          v-for="(proyecto, index) in proyectosFiltrados"
           :key="proyecto.id"
           class="tarjeta reveal-item"
           :class="{ active: isRevealed }"
@@ -88,29 +120,76 @@ function onImgError(id) {
               <div class="tarjeta-info">
                 <h3>{{ locale === 'es' ? proyecto.titulo : proyecto.tituloEn }}</h3>
                 <span class="ver-mas" aria-hidden="true">
-                  {{ locale === 'es' ? 'Ver detalle' : 'View detail' }}
+                  {{ t.verDetalle }}
                   <ion-icon name="sync-outline"></ion-icon>
                 </span>
               </div>
             </div>
 
             <!-- Cara trasera -->
-            <div class="tarjeta-back" aria-hidden="true">
+            <div class="tarjeta-back">
               <span class="categoria">{{ proyecto.categoria }}</span>
               <h3>{{ locale === 'es' ? proyecto.titulo : proyecto.tituloEn }}</h3>
               <p>{{ locale === 'es' ? proyecto.descripcion : proyecto.descripcionEn }}</p>
+
+              <!-- Enlace externo opcional (video/demo/repo) -->
+              <a
+                v-if="proyecto.enlace"
+                class="tarjeta-enlace"
+                :href="proyecto.enlace"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {{ proyecto.enlaceTexto || t.verDemo }}
+                <ion-icon name="open-outline" aria-hidden="true"></ion-icon>
+              </a>
             </div>
           </div>
         </article>
         </template>
       </div>
 
-      <p v-if="!cargando && proyectos.length === 0" class="vacio" role="status">{{ t.vacio }}</p>
+      <p v-if="!cargando && proyectosFiltrados.length === 0" class="vacio" role="status">{{ t.vacio }}</p>
     </div>
   </section>
 </template>
 
 <style scoped>
+/* ── Filtro por categoría ── */
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.filtro {
+  padding: 0.45rem 1.1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-color);
+}
+.filtro:hover {
+  border-color: var(--sunset-orange);
+  color: var(--sunset-orange);
+}
+.filtro.activo {
+  background: var(--sunset-orange);
+  border-color: var(--sunset-orange);
+  color: #fff;
+}
+.filtro:focus-visible {
+  outline: 2px solid var(--sunset-orange);
+  outline-offset: 2px;
+}
+
 .galeria-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(18.75rem, 1fr));
@@ -173,7 +252,7 @@ function onImgError(id) {
   width: 100%;
   height: 13.125rem;
   background:
-    radial-gradient(circle at 50% 35%, rgba(232, 89, 60, 0.12), transparent 60%),
+    radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--sunset-orange) 12%, transparent), transparent 60%),
     var(--color-surface2);
   border-bottom: 1px dashed var(--color-border);
   display: flex;
@@ -198,7 +277,8 @@ function onImgError(id) {
   display: flex;
   align-items: flex-end;
   padding: 1rem;
-  background: linear-gradient(to top, rgba(15, 10, 24, 0.7), transparent 60%);
+  /* Oscuro fijo en ambos temas: garantiza contraste sobre la imagen. */
+  background: linear-gradient(to top, rgb(15 10 24 / 0.7), transparent 60%);
 }
 
 .categoria {
@@ -208,10 +288,10 @@ function onImgError(id) {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--sunset-gold);
-  background: rgba(15, 10, 24, 0.6);
+  background: rgb(15 10 24 / 0.6);
   padding: 0.3rem 0.7rem;
   border-radius: 999px;
-  border: 1px solid rgba(242, 166, 35, 0.4);
+  border: 1px solid color-mix(in srgb, var(--sunset-gold) 40%, transparent);
 }
 
 .tarjeta-info {
@@ -240,18 +320,43 @@ function onImgError(id) {
   gap: 0.75rem;
   padding: 1.75rem;
   background:
-    radial-gradient(circle at 80% 0%, rgba(242, 166, 35, 0.12), transparent 55%),
+    radial-gradient(circle at 80% 0%, color-mix(in srgb, var(--sunset-gold) 12%, transparent), transparent 55%),
     var(--color-surface2);
 }
 .tarjeta-back h3 { font-size: 1.25rem; }
 .tarjeta-back p { color: var(--color-muted); font-size: 0.92rem; line-height: 1.6; }
+
+/* Enlace externo (video/demo/repo) en la cara trasera */
+.tarjeta-enlace {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  align-self: flex-start;
+  margin-top: 0.25rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--sunset-orange);
+  border-radius: 999px;
+  color: var(--sunset-orange);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+.tarjeta-enlace:hover {
+  background: var(--sunset-orange);
+  color: #fff;
+  opacity: 1;
+}
+.tarjeta-enlace:focus-visible {
+  outline: 2px solid var(--sunset-orange);
+  outline-offset: 2px;
+}
 
 /* Resplandor en hover/focus (holográfico) */
 .tarjeta:hover .tarjeta-front,
 .tarjeta:hover .tarjeta-back,
 .tarjeta:focus-within .tarjeta-front,
 .tarjeta:focus-within .tarjeta-back {
-  border-color: rgba(232, 89, 60, 0.5);
+  border-color: color-mix(in srgb, var(--sunset-orange) 50%, transparent);
   box-shadow: var(--shadow-lg);
 }
 
