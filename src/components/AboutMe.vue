@@ -3,6 +3,8 @@ import { ref, computed } from 'vue'
 import { useI18n } from '../composables/useI18n.js'
 import { useScrollReveal } from '../composables/useScrollReveal.js'
 import { useTypewriter } from '../composables/useTypewriter.js'
+import { useFizzyParticles } from '../composables/useFizzyParticles.js'
+import FizzyButton from './FizzyButton.vue'
 
 const props = defineProps({
   cvRuta: { type: String, default: '' },
@@ -62,8 +64,10 @@ const RESET_DELAY_MS = 5200
 const cvCheckbox = ref(null)
 const descargando = ref(false)
 
-function onCvClick() {
-  if (descargando.value) return
+// @change del checkbox (no @click del label): así también funciona
+// activándolo con el teclado (Espacio sobre el input enfocado).
+function onCvChange(event) {
+  if (!event.target.checked || descargando.value) return
   descargando.value = true
 
   setTimeout(() => {
@@ -81,86 +85,9 @@ function onCvClick() {
 }
 
 // ── Partículas del botón CV ───────────────────────────────────
-// Sustituye a los bucles SCSS: cada partícula lleva sus valores
-// (posición, color, tiempos, destino) en variables CSS calculadas aquí.
-const SPOT_COUNT = 52
-const randInt = (max) => Math.floor(Math.random() * max) + 1 // 1..max
-
-const particles = Array.from({ length: SPOT_COUNT }, (_, idx) => {
-  const i = idx + 1
-
-  // Posición base por grupo (el último grupo que cubre el índice gana).
-  let left
-  let top
-  if (i <= 19) {
-    left = -25 + i * 12
-    top = 50
-  } else if (i <= 39) {
-    left = -255 + i * 12
-    top = -12
-  } else if (i <= 45) {
-    left = 204
-    top = -488 + i * 12
-  } else {
-    left = -10
-    top = -568 + i * 12
-  }
-
-  // Destino de la explosión por grupo.
-  let endX
-  let endY
-  if (i <= 19) {
-    endX = -20 + i * 2
-    endY = 30
-  } else if (i <= 39) {
-    endX = -50 + i * 2
-    endY = -30
-  } else if (i <= 45) {
-    endX = 40
-    endY = -86 + i * 2
-  } else {
-    endX = -40
-    endY = -99 + i * 2
-  }
-
-  return {
-    left,
-    top,
-    endX,
-    endY,
-    padBase: randInt(3) + 2,
-    hue: randInt(60) + 10,
-    sat: 57 - randInt(10),
-    originX: 90 - randInt(10),
-    originY: 20 - randInt(10),
-    dur: 1 + randInt(10) / 10,
-    pad: randInt(20) / 4 + 2,
-    activeTop: 16 - randInt(10),
-    durRotate: 4 + randInt(4) / 10,
-    delRotate: 0.25 + randInt(12) / 10,
-    delSpot: randInt(10) / 10,
-  }
-})
-
-function spotStyle(p) {
-  return {
-    '--left': `${p.left}px`,
-    '--top': `${p.top}px`,
-    '--pad-base': `${p.padBase}px`,
-    '--h': p.hue,
-    '--s': `${p.sat}%`,
-    '--tx': `${p.originX}px`,
-    '--ty': `${p.originY}px`,
-    '--dur': `${p.dur}s`,
-    '--pad': `${p.pad}px`,
-    '--active-top': `${p.activeTop}px`,
-    '--dur-rotate': `${p.durRotate}s`,
-    '--del-rotate': `${p.delRotate}s`,
-    '--del-spot': `${p.delSpot}s`,
-    '--end-x': `${p.endX}px`,
-    '--end-y': `${p.endY}px`,
-  }
-}
+// Mismo enjambre "fizzy" que comparten los demás botones (FizzyButton);
+// aquí, además, el CSS las usa para la secuencia de descarga (giro→check).
+const { particles, spotStyle } = useFizzyParticles()
 
 // ── Efecto zonas 3x3 sobre la foto ────────────────────────────
 const zonaActiva = ref(0)
@@ -198,12 +125,15 @@ function resetZona() {
         <!-- Columna izquierda: foto -->
         <div class="hero-wrap reveal" :class="{ active: isRevealed }">
           <div class="hero-img">
+            <!-- Imagen LCP (above the fold): prioridad alta, nunca lazy. -->
             <img
               class="foto"
               :src="fotoUrl"
               :alt="t.fotoAlt"
               width="256"
               height="320"
+              fetchpriority="high"
+              decoding="async"
               :style="{ transform: fotoTransform }"
             />
             <div class="zonas">
@@ -236,24 +166,26 @@ function resetZona() {
           <!-- Fila de botones -->
           <div class="botones-fila">
 
-            <button
-              class="btn-audio"
+            <FizzyButton tag="a" variant="solid" href="#contacto">
+              {{ t.contactame }}
+              <ion-icon name="arrow-down-outline" aria-hidden="true"></ion-icon>
+            </FizzyButton>
+
+            <FizzyButton
+              tag="button"
+              variant="outline"
               type="button"
-              :class="{ activo: reproduciendo }"
+              :class="{ 'is-active': reproduciendo }"
               :aria-pressed="reproduciendo"
               @click="toggleAudio"
             >
-              <!-- Ecualizador animado mientras suena; icono play/pause si no -->
-              <span v-if="reproduciendo" class="eq" aria-hidden="true">
-                <i></i><i></i><i></i><i></i>
-              </span>
-              <ion-icon v-else name="play" aria-hidden="true"></ion-icon>
+              <ion-icon :name="reproduciendo ? 'pause' : 'play'" aria-hidden="true"></ion-icon>
               {{ reproduciendo ? t.pausar : t.escuchar }}
-            </button>
+            </FizzyButton>
 
             <div class="cv-wrapper">
-              <input ref="cvCheckbox" type="checkbox" id="cv-check" />
-              <label for="cv-check" @click="onCvClick">
+              <input ref="cvCheckbox" type="checkbox" id="cv-check" @change="onCvChange" />
+              <label for="cv-check">
                 <div class="button_inner">
                   <ion-icon name="log-in-outline" class="l"></ion-icon>
                   <span class="t">{{ t.descargarCv }}</span>
@@ -292,10 +224,15 @@ function resetZona() {
           <video
             controls
             preload="none"
+            playsinline
             class="video-player"
             :poster="posterUrl"
           >
             <source :src="videoUrl" type="video/mp4">
+            <p>
+              {{ t.videoFallback }}
+              <a :href="videoUrl" download>{{ t.videoDescargar }}</a>
+            </p>
           </video>
         </div>
       </div>
@@ -338,14 +275,14 @@ function resetZona() {
   border-radius: 1rem;
   overflow: hidden;
   box-shadow: 0 0 0 1px var(--color-border),
-              0 0 20px rgba(232, 89, 60, 0);
+              0 0 20px rgb(232 89 60 / 0);
   transition: box-shadow 0.4s ease;
 }
 
 .hero-img:hover {
-  box-shadow: 0 0 0 1px rgba(232, 89, 60, 0.6),
-              0 0 30px rgba(232, 89, 60, 0.3),
-              0 0 60px rgba(242, 166, 35, 0.15);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--sunset-orange) 60%, transparent),
+              0 0 30px color-mix(in srgb, var(--sunset-orange) 30%, transparent),
+              0 0 60px color-mix(in srgb, var(--sunset-gold) 15%, transparent);
 }
 
 /* Flotación suave en reposo — solo si el usuario no pidió menos movimiento. */
@@ -449,76 +386,14 @@ h1 {
 .botones-fila {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
   margin-bottom: 0.75rem;
 }
 
-/* Botón audio */
-.btn-audio {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.75rem;
-  height: 3rem;
-  border: 1.5px solid var(--sunset-orange);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--sunset-orange);
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-.btn-audio ion-icon { font-size: 1.05rem; }
-.btn-audio:hover,
-.btn-audio.activo {
-  background-color: var(--sunset-orange);
-  color: #fff;
-}
-.btn-audio:active { transform: scale(0.96); }
-.btn-audio:focus-visible {
-  outline: 2px solid var(--sunset-orange);
-  outline-offset: 3px;
-}
-/* Pulso suave mientras reproduce */
-.btn-audio.activo {
-  animation: audio-pulse 1.6s ease-in-out infinite;
-}
-@keyframes audio-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(232, 89, 60, 0.45); }
-  50%      { box-shadow: 0 0 0 0.5rem rgba(232, 89, 60, 0); }
-}
-
-/* Ecualizador animado (barras) dentro del botón al reproducir */
-.eq {
-  display: inline-flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: 1.05rem;
-}
-.eq i {
-  width: 3px;
-  height: 100%;
-  border-radius: 1px;
-  background: currentColor;
-  transform-origin: bottom;
-  animation: eq-bar 0.9s ease-in-out infinite;
-}
-.eq i:nth-child(2) { animation-delay: 0.2s; }
-.eq i:nth-child(3) { animation-delay: 0.4s; }
-.eq i:nth-child(4) { animation-delay: 0.1s; }
-@keyframes eq-bar {
-  0%, 100% { transform: scaleY(0.3); }
-  50%      { transform: scaleY(1); }
-}
-
-/* Accesibilidad: sin loops perpetuos si se pide menos movimiento */
-@media (prefers-reduced-motion: reduce) {
-  .btn-audio.activo { animation: none; }
-  .eq i { animation: none; transform: scaleY(0.6); }
-}
+/* Los botones Contáctame y Escuchar usan el componente FizzyButton
+   (variantes solid y outline); su contenido (icono play/pause + texto)
+   va en el slot. */
 
 /* ── Botón CV Fizzy ── */
 .cv-wrapper {
@@ -542,19 +417,21 @@ h1 {
 .button_inner {
   border-radius: 999px;
   position: relative;
-  width: 12rem;
-  height: 3rem;
+  width: 8.75rem;
+  height: 2.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   cursor: pointer;
-  border: 2px solid var(--sunset-gold);
+  border: 1.5px solid var(--sunset-gold);
   color: var(--sunset-gold);
   font-family: var(--font-body);
   text-align: center;
-  transition: all 0.3s, box-shadow 0.2s, transform 0.2s 0.2s;
+  /* Propiedades explícitas (no `all`): solo transiciona lo que cambia. */
+  transition: color 0.3s, background-color 0.3s, width 0.3s,
+              border-radius 0.3s, box-shadow 0.2s, transform 0.2s 0.2s;
   overflow: visible;
 }
 .button_inner span.t {
@@ -566,20 +443,20 @@ h1 {
 }
 .button_inner .l {
   position: relative;
-  left: -1.2rem;
+  left: -1rem;
   top: 0.1rem;
   color: var(--sunset-orange);
-  font-size: 1.4rem;
+  font-size: 1.1rem;
   opacity: 0;
   transition: left 0.3s 0s, top 0.3s 0s, opacity 0.3s 0s;
 }
 .button_inner:hover {
   color: #1a0f0a;
   background: var(--sunset-gold);
-  box-shadow: 0 17px 18px -14px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 17px 18px -14px rgb(0 0 0 / 0.3);
 }
 .button_inner:hover span.t {
-  left: 1rem;
+  left: 0.8rem;
   transition: left 0.4s;
 }
 .button_inner:hover .l {
@@ -595,46 +472,64 @@ h1 {
   transform: scale(0) rotate(-90deg);
   color: var(--sunset-gold);
   margin: auto;
-  font-size: 1.4rem;
+  font-size: 1.1rem;
 }
 
-/* Partículas: posición y aspecto base desde variables CSS por partícula */
+/* Contenedor del enjambre: cubre el botón (inset 0) para que el borde
+   elíptico inscrito (50% por eje) coincida con el borde de la píldora. */
+.b_l_quad {
+  position: absolute;
+  inset: 0;
+}
+
+/* Partículas: nacen en su punto del borde (cos/sin del ángulo). Mismo
+   modelo radial que FizzyButton, para que salgan exactas del borde. */
 .button_spots {
   position: absolute;
-  border-radius: 100px;
+  left: calc(50% + cos(var(--angle)) * 50%);
+  top: calc(50% + sin(var(--angle)) * 50%);
+  width: var(--size);
+  height: var(--size);
+  margin-left: calc(var(--size) / -2);
+  margin-top: calc(var(--size) / -2);
+  border-radius: 50%;
   opacity: 0;
-  left: var(--left);
-  top: var(--top);
-  padding: var(--pad-base);
-  transform-origin: var(--tx) var(--ty);
-  background: hsl(var(--h), var(--s), 65%);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.12);
-  transition: all var(--dur);
+  background: hsl(var(--h) 95% 62%);
+  box-shadow: 0 0 6px hsl(var(--h) 90% 55% / 0.7);
 }
 
-/* Fizz en hover (como el original "super fizzy"): las partículas
-   burbujean en bucle alrededor del botón mientras el cursor está encima. */
+/* Hover: emisión radial hacia afuera, en bucle. */
 .button_inner:hover .button_spots {
-  animation: spot 0.7s var(--del-spot) linear infinite;
+  animation: cv-emit var(--dur) var(--delay) ease-out infinite;
+}
+@keyframes cv-emit {
+  0%   { opacity: 0; transform: translate(0, 0) scale(0.2); }
+  25%  { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: translate(calc(cos(var(--angle)) * var(--dist)),
+                         calc(sin(var(--angle)) * var(--dist))) scale(1);
+  }
 }
 
 /* Estado activado */
 input:checked + label .button_inner {
   background: transparent;
   transform: rotate(90deg);
-  width: 3rem;
+  width: 2.25rem;
   border-radius: 100px;
-  box-shadow: 0 0 0 440px rgba(0, 0, 0, 0);
+  box-shadow: 0 0 0 440px rgb(0 0 0 / 0);
   animation: finalbox 0.4s 4.42s cubic-bezier(0.39, 2.01, 0.27, 0.75) forwards;
 }
 input:checked + label .button_inner span.t {
   opacity: 0;
   top: 1.25rem;
 }
+/* Centrado dentro del círculo final de 2.25rem: (2.25 - 1.1) / 2 */
 input:checked + label .l {
-  left: 0.875rem;
+  left: 0.575rem;
   opacity: 1;
-  top: 0.2rem;
+  top: 0.15rem;
   animation: bajar 1s 0.25s infinite, final 0.2s 4s forwards;
 }
 input:checked + label .tick {
@@ -642,26 +537,20 @@ input:checked + label .tick {
   top: 0;
   animation: tick-anim 0.3s 4.7s forwards;
 }
+/* Al confirmar la descarga, las partículas explotan radialmente desde el
+   borde (sale por su ángulo, más lejos y girando). Sin !important: este
+   selector ya gana a .button_spots y al hover. */
 input:checked + label .button_spots {
-  top: var(--active-top) !important;
-  left: -34px !important;
   opacity: 0;
-  padding: var(--pad) !important;
-  animation:
-    spew 1s 0.3s forwards,
-    rotate var(--dur-rotate) var(--del-rotate) linear infinite,
-    final 0.2s 4s forwards,
-    spot 0.7s var(--del-spot) linear infinite !important;
+  animation: cv-burst var(--burst-dur) 0.3s ease-out forwards;
 }
-
-/* Una sola keyframe: el destino lo aporta cada partícula vía --end-x/--end-y */
-@keyframes spot {
-  from {
+@keyframes cv-burst {
+  0%   { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); }
+  15%  { opacity: 1; }
+  100% {
     opacity: 0;
-  }
-  to {
-    transform: translateY(var(--end-y)) translateX(var(--end-x));
-    opacity: 0.6;
+    transform: translate(calc(cos(var(--angle)) * var(--burst)),
+                         calc(sin(var(--angle)) * var(--burst))) scale(0.3) rotate(var(--spin));
   }
 }
 
@@ -669,20 +558,12 @@ input:checked + label .button_spots {
   from { transform: translateY(0); }
   to   { transform: translateY(6px); }
 }
-@keyframes spew {
-  from { opacity: 0; }
-  to   { opacity: 0.8; }
-}
-@keyframes rotate {
-  from { opacity: 0.8; }
-  to   { transform: rotate(360deg); opacity: 0.8; }
-}
 @keyframes final {
   from { opacity: 1; }
   to   { opacity: 0; }
 }
 @keyframes finalbox {
-  to { width: 3rem; }
+  to { width: 2.25rem; }
 }
 @keyframes tick-anim {
   to { transform: scale(1) rotate(-90deg); }
@@ -701,16 +582,29 @@ input:checked + label .button_spots {
 
 .video-container {
   position: relative;
-  max-width: 50rem;
+  /* Vídeo vertical (3:4): ancho contenido para que no domine la página. */
+  max-width: 22rem;
   margin-inline: auto;
 }
 
 .video-player {
   width: 100%;
+  /* Reserva el espacio con la proporción real (evita saltos de layout). */
+  aspect-ratio: 3 / 4;
+  /* contain (no cover): en pantalla completa muestra el vídeo vertical
+     entero con barras, en vez de recortar la imagen. En el reproductor
+     normal no cambia nada (contenedor y vídeo son 3:4). */
+  object-fit: contain;
   border-radius: var(--radius);
-  background: var(--color-surface2);
-  border: 2px dashed var(--color-border);
-  min-height: 18rem;
+  /* Gris oscuro neutro: son las barras laterales del vídeo vertical en
+     pantalla completa (object-fit contain las rellena con este color). */
+  background: #14151a;
+  border: 1px solid var(--color-border);
+}
+
+/* Fondo de pantalla completa: gris oscuro neutro (no el morado del tema). */
+.video-player::backdrop {
+  background: #14151a;
 }
 
 /* ── Responsive ── */

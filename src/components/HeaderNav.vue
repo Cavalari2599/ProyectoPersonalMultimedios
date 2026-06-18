@@ -37,16 +37,22 @@ function moverSubrayado() {
   underline.width = activo.offsetWidth
 }
 
-watch(activeId, () => nextTick(moverSubrayado))
+// El idioma también recoloca el subrayado: cambia el ancho de los enlaces.
+watch([activeId, locale], () => nextTick(moverSubrayado))
+
+// ResizeObserver sobre el nav (en vez de escuchar window resize);
+// su callback inicial cubre el posicionamiento al montar.
+let resizeObserver = null
 onMounted(() => {
-  nextTick(moverSubrayado)
-  window.addEventListener('resize', moverSubrayado, { passive: true })
+  if (!navEl.value) return
+  resizeObserver = new ResizeObserver(() => moverSubrayado())
+  resizeObserver.observe(navEl.value)
 })
-onUnmounted(() => window.removeEventListener('resize', moverSubrayado))
+onUnmounted(() => resizeObserver?.disconnect())
 </script>
 
 <template>
-  <header class="nav" :class="{ scrolled }" role="banner">
+  <header class="nav" :class="{ scrolled }">
     <div class="container nav-inner">
       <span class="nav-brand">
         <ion-icon name="ellipse" class="dot" aria-hidden="true"></ion-icon> Portfolio
@@ -75,7 +81,7 @@ onUnmounted(() => window.removeEventListener('resize', moverSubrayado))
           {{ locale === 'es' ? 'EN' : 'ES' }}
         </button>
         <button class="btn-control btn-icon" type="button" @click="toggleTheme"
-          :aria-label="theme === 'night' ? 'Activar modo día' : 'Activar modo noche'">
+          :aria-label="theme === 'night' ? t.temaDia : t.temaNoche">
           <ion-icon
             :name="theme === 'night' ? 'sunny-outline' : 'moon-outline'"
             :style="{ transform: theme === 'day' ? 'rotate(180deg)' : 'rotate(0deg)' }"
@@ -184,8 +190,9 @@ onUnmounted(() => window.removeEventListener('resize', moverSubrayado))
 .btn-icon ion-icon { transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
 @media (width <= 640px) {
-  .nav-inner { gap: 1rem; }
-  .nav-links { gap: 0.75rem; font-size: 0.85rem; }
+  .nav-inner { gap: 0.75rem 1rem; flex-wrap: wrap; justify-content: center; }
+  .nav-links { gap: 0.75rem; flex-wrap: wrap; justify-content: center; }
+  .nav-links a { font-size: 0.85rem; }
   .nav-brand  { font-size: 1rem; }
 }
 </style>

@@ -1,7 +1,6 @@
 <script setup>
 import { useI18n } from '../composables/useI18n.js'
 import { useScrollReveal } from '../composables/useScrollReveal.js'
-import { openExternal } from '../utils/openExternal.js'
 
 defineProps({
   contacto: {
@@ -20,61 +19,64 @@ const { target: seccionRef, isRevealed } = useScrollReveal({ threshold: 0.1 })
 
       <h2 class="section-title">{{ t.titulo }}</h2>
 
+      <!-- Enlaces reales (no botones con JS): permiten clic medio,
+           copiar enlace y funcionan sin JavaScript. -->
       <div class="contacto-grid">
 
-        <button
+        <a
           v-if="contacto.email"
-          type="button"
           class="contacto-card reveal-item"
           :class="{ active: isRevealed }"
           style="transition-delay: 0s"
-          @click="openExternal(`mailto:${contacto.email}`)"
+          :href="`mailto:${contacto.email}`"
         >
           <span class="contacto-icono">
-            <ion-icon name="mail-outline"></ion-icon>
+            <ion-icon name="mail-outline" aria-hidden="true"></ion-icon>
           </span>
           <span class="contacto-info">
             <span class="contacto-label">Email</span>
             <span class="contacto-valor">{{ contacto.email }}</span>
           </span>
-          <ion-icon name="arrow-forward-outline" class="contacto-flecha"></ion-icon>
-        </button>
+          <ion-icon name="arrow-forward-outline" class="contacto-flecha" aria-hidden="true"></ion-icon>
+        </a>
 
-        <button
+        <a
           v-if="contacto.linkedin"
-          type="button"
           class="contacto-card reveal-item"
           :class="{ active: isRevealed }"
           style="transition-delay: 0.08s"
-          @click="openExternal(contacto.linkedin)"
+          :href="contacto.linkedin"
+          target="_blank"
+          rel="noopener noreferrer"
         >
           <span class="contacto-icono linkedin">
-            <ion-icon name="logo-linkedin"></ion-icon>
+            <ion-icon name="logo-linkedin" aria-hidden="true"></ion-icon>
           </span>
           <span class="contacto-info">
             <span class="contacto-label">LinkedIn</span>
             <span class="contacto-valor">{{ contacto.linkedin.replace('https://www.linkedin.com/in/', '') }}</span>
           </span>
-          <ion-icon name="arrow-forward-outline" class="contacto-flecha"></ion-icon>
-        </button>
+          <ion-icon name="arrow-forward-outline" class="contacto-flecha" aria-hidden="true"></ion-icon>
+        </a>
 
-        <button
+        <a
           v-if="contacto.github"
-          type="button"
           class="contacto-card reveal-item"
           :class="{ active: isRevealed }"
           style="transition-delay: 0.16s"
-          @click="openExternal(contacto.github)"
+          :href="contacto.github"
+          target="_blank"
+          rel="noopener noreferrer"
         >
           <span class="contacto-icono github">
-            <ion-icon name="logo-github"></ion-icon>
+            <ion-icon name="logo-github" aria-hidden="true"></ion-icon>
           </span>
           <span class="contacto-info">
             <span class="contacto-label">GitHub</span>
             <span class="contacto-valor">{{ contacto.github.replace('https://github.com/', '') }}</span>
           </span>
-          <ion-icon name="arrow-forward-outline" class="contacto-flecha"></ion-icon>
-        </button>
+          <ion-icon name="arrow-forward-outline" class="contacto-flecha" aria-hidden="true"></ion-icon>
+        </a>
 
       </div>
 
@@ -91,14 +93,14 @@ const { target: seccionRef, isRevealed } = useScrollReveal({ threshold: 0.1 })
   margin-inline: auto;
 }
 
-/* Tarjeta de contacto (botón accesible por teclado) */
+/* Tarjeta de contacto (enlace con apariencia de tarjeta) */
 .contacto-card {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.85rem;
   width: 100%;
-  padding: 1.15rem 1.35rem;
+  padding: 0.85rem 1.1rem;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
@@ -150,33 +152,33 @@ const { target: seccionRef, isRevealed } = useScrollReveal({ threshold: 0.1 })
 .contacto-icono {
   display: grid;
   place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 2.4rem;
+  height: 2.4rem;
   flex-shrink: 0;
-  border-radius: 0.7rem;
-  font-size: 1.35rem;
+  border-radius: 0.6rem;
+  font-size: 1.2rem;
   color: var(--sunset-orange);
-  background: rgba(232, 89, 60, 0.1);
+  background: color-mix(in srgb, var(--sunset-orange) 10%, transparent);
   transition: transform 0.28s ease;
 }
 .contacto-card:hover .contacto-icono {
   transform: scale(1.06) rotate(-3deg);
-  box-shadow: 0 0 1.5rem rgba(232, 89, 60, 0.4);
+  box-shadow: 0 0 1.5rem color-mix(in srgb, var(--sunset-orange) 40%, transparent);
 }
 
 .contacto-icono.linkedin {
   color: #2b8aef;
-  background: rgba(10, 102, 194, 0.14);
+  background: rgb(10 102 194 / 0.14);
 }
 .contacto-card:hover .contacto-icono.linkedin {
-  box-shadow: 0 0 1.5rem rgba(43, 138, 239, 0.45);
+  box-shadow: 0 0 1.5rem rgb(43 138 239 / 0.45);
 }
 .contacto-icono.github {
   color: var(--color-text);
-  background: rgba(125, 125, 135, 0.16);
+  background: rgb(125 125 135 / 0.16);
 }
 .contacto-card:hover .contacto-icono.github {
-  box-shadow: 0 0 1.5rem rgba(125, 125, 135, 0.4);
+  box-shadow: 0 0 1.5rem rgb(125 125 135 / 0.4);
 }
 
 /* Texto con jerarquía clara: plataforma destacada, detalle en mute */
@@ -189,7 +191,7 @@ const { target: seccionRef, isRevealed } = useScrollReveal({ threshold: 0.1 })
 }
 
 .contacto-label {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   letter-spacing: 0.01em;
   color: var(--color-text);

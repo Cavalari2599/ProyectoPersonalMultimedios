@@ -28,33 +28,36 @@ function getLerp(index) {
 
       <h2 class="section-title">{{ t.titulo }}</h2>
 
-      <!-- Dock de tecnologías con efecto de expansión -->
-      <!-- @mouseleave del contenedor resetea el activo -->
+      <!-- Dock de tecnologías con efecto de expansión.
+           Es una lista (ul/li), no navegación. @mouseleave resetea el activo. -->
       <div class="dock-wrapper reveal-item" :class="{ active: isRevealed }" @mouseleave="activo = -1">
-        <nav class="dock" aria-label="Tecnologías">
+        <ul class="dock">
 
           <!--
-            v-for sobre el array de tecnologías que llegó como prop.
-            Cada item calcula su propio lerp según distancia al cursor.
-            :style pasa el lerp como variable CSS para que el CSS lo use.
+            Cada item calcula su propio lerp según distancia al activo;
+            :style lo pasa como variable CSS. tabindex + focus/blur dan
+            acceso por teclado al nombre (el tooltip no es solo hover).
           -->
-          <div
+          <li
             v-for="(tech, index) in tecnologias"
             :key="tech.nombre"
             class="dock-item"
+            tabindex="0"
             :style="{ '--lerp': getLerp(index) }"
             @mouseenter="activo = index"
+            @focus="activo = index"
+            @blur="activo = -1"
           >
             <!-- Ícono de Devicons via clase CSS -->
             <div class="dock-icono">
-              <i :class="tech.icono"></i>
+              <i :class="tech.icono" aria-hidden="true"></i>
             </div>
 
-            <!-- Tooltip con el nombre — aparece al hover -->
+            <!-- Tooltip con el nombre — aparece al hover o foco -->
             <span class="dock-label">{{ tech.nombre }}</span>
-          </div>
+          </li>
 
-        </nav>
+        </ul>
       </div>
 
     </div>
@@ -79,16 +82,19 @@ function getLerp(index) {
   transform: translateY(0);
 }
 
-/* Contenedor del dock — fila flex que se adapta con flex-wrap */
+/* Contenedor del dock — fila flex que se adapta con flex-wrap.
+   El fondo deriva de la superficie del tema (día y noche). */
 .dock {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   align-items: flex-end;
   gap: 0.75rem;
+  margin: 0;
   padding: 1rem 1.5rem;
+  list-style: none;
   border-radius: 1.25rem;
-  background: rgba(26, 16, 37, 0.7);
+  background: color-mix(in srgb, var(--color-surface) 70%, transparent);
   border: 1px solid var(--color-border);
   backdrop-filter: blur(12px);
   max-width: 55rem;
@@ -126,9 +132,16 @@ function getLerp(index) {
   transform: translateY(calc(var(--lerp, 0) * -0.75rem));
 }
 
-.dock-item:hover .dock-icono {
+.dock-item:focus-visible {
+  outline: 2px solid var(--sunset-orange);
+  outline-offset: 3px;
+  border-radius: 0.75rem;
+}
+
+.dock-item:hover .dock-icono,
+.dock-item:focus-visible .dock-icono {
   background: var(--color-surface);
-  border-color: rgba(232, 89, 60, 0.4);
+  border-color: color-mix(in srgb, var(--sunset-orange) 40%, transparent);
 }
 
 /* Ícono de Devicons */
