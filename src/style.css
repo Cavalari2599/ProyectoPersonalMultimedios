@@ -1,296 +1,120 @@
+/* Fuentes: cargadas con <link> en index.html (un @import aquí duplicaría
+   la descarga y bloquearía en serie). */
+
+/* ── Tema con light-dark(): primer valor modo día, segundo modo noche.
+   color-scheme decide cuál aplica; lo fija data-theme desde useTheme. ── */
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  color-scheme: dark;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  --sunset-orange:  #e8593c;
+  --sunset-gold:    #f2a623;
+  --sunset-deep:    #c04828;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --color-bg:       light-dark(#fdf6ee, #0f0a18);
+  --color-surface:  light-dark(#fff8f2, #1a1025);
+  --color-surface2: light-dark(#fdeede, #231530);
+  --color-text:     light-dark(#1a0f0a, #f0e6d3);
+  --color-muted:    light-dark(#6b4d38, #9e8a7a);
+  --color-border:   light-dark(#f0d5bc, #2e1f3a);
+  --color-accent:   light-dark(var(--sunset-deep, #c04828), var(--sunset-orange, #e8593c));
+  --color-accent2:  light-dark(#b5640a, var(--sunset-gold, #f2a623));
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'DM Sans', system-ui, sans-serif;
+
+  --radius:    0.875rem;
+  --radius-sm: 0.5rem;
+  --shadow:    0 0.5rem 2rem light-dark(rgb(192 72 40 / 0.1), rgb(232 89 60 / 0.12));
+  --shadow-lg: 0 1.25rem 3.75rem light-dark(rgb(0 0 0 / 0.12), rgb(0 0 0 / 0.5));
+
+  --transition-color:     color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+  --transition-transform: transform 0.3s ease;
+  --transition-opacity:   opacity 0.3s ease;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+[data-theme="day"] { color-scheme: light; }
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
+
+html { scroll-behavior: smooth; }
 
 body {
-  margin: 0;
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.65;
+  font-size: 1rem;
+  transition: background-color 0.4s ease, color 0.4s ease;
+  overflow-x: hidden;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+#app { min-height: 100dvh; }
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  line-height: 1.2;
+  color: var(--color-text);
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: var(--transition-opacity);
 }
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
+a:hover { opacity: 0.75; }
+
+img { max-width: 100%; display: block; }
+
+.container {
+  max-width: 68.75rem;
+  margin-inline: auto;
+  padding-inline: 2rem;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
+.section { padding-block: 6rem; }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
-}
-
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
-
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-}
-
-.hero {
-  position: relative;
-
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
-}
-
-#app {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
+.section-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  margin-bottom: 3rem;
   text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+  /* Fallback de color por si background-clip:text no está soportado. */
+  color: var(--color-accent);
+  background: linear-gradient(135deg, var(--sunset-orange), var(--sunset-gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-#center {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
+::-webkit-scrollbar { width: 0.375rem; }
+::-webkit-scrollbar-track { background: var(--color-bg); }
+::-webkit-scrollbar-thumb { background: var(--sunset-orange); border-radius: 0.1875rem; }
 
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
+@media (width <= 1024px) {
+  .container { padding-inline: 1.5rem; }
 }
 
-#next-steps {
-  display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
+@media (width <= 640px) {
+  .section { padding-block: 4rem; }
 }
 
-#docs {
-  border-right: 1px solid var(--border);
+/* ── Accesibilidad: respeta a quien pide menos movimiento ──
+   Enfoque quirúrgico (no mazazo): se cortan los loops decorativos
+   perpetuos y el desplazamiento de los reveals (quedan como fundido),
+   pero se conservan transiciones de hover, foco y el botón fizzy,
+   que son feedback de interacción y los inicia el usuario. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
 
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-}
-
-#next-steps ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 8px;
-  margin: 32px 0 0;
-
-  .logo {
-    height: 18px;
-  }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
-}
-
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
-}
-
-.ticks {
-  position: relative;
-  width: 100%;
-
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
-  }
-
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
-  }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
+  /* Reveals: solo fundido, sin desplazamiento. */
+  .reveal,
+  .reveal-item {
+    transform: none !important;
   }
 }
