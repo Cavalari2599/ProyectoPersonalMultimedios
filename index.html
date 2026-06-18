@@ -11,6 +11,9 @@
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Portfolio · Carlos Daniel" />
     <meta property="og:description" content="Proyectos, tecnologías y contacto de Carlos Daniel (Cava)." />
+    <!-- Ruta relativa a la raíz: al publicar, conviene volverla absoluta con el dominio final. -->
+    <meta property="og:image" content="/og-image.jpeg" />
+    <meta property="og:locale" content="es_CR" />
 
     <!-- Fuentes: preconnect + link (no @import, evita bloqueo en serie) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -20,11 +23,11 @@
       href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap"
     />
 
-    <!-- Iconos: Devicon (CSS) + Ionicons (web component) -->
+    <!-- Iconos: Devicon (CSS) + Ionicons (web component). Versiones fijadas:
+         @latest cambia sin aviso (riesgo supply-chain y caché inestable). -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/devicon.min.css" />
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 
     <title>Portfolio · Carlos Daniel</title>
   </head>
