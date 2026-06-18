@@ -27,6 +27,8 @@ export const messages = {
       todas: 'Todos',
       verDetalle: 'Ver detalle',
       verDemo: 'Ver demo',
+      verVideo: 'Ver demo en video',
+      cerrar: 'Cerrar video',
       vacio: 'Aún no hay proyectos para mostrar.',
     },
     skills: {
@@ -68,6 +70,8 @@ export const messages = {
       todas: 'All',
       verDetalle: 'View detail',
       verDemo: 'View demo',
+      verVideo: 'Watch demo video',
+      cerrar: 'Close video',
       vacio: 'No projects to show yet.',
     },
     skills: {
