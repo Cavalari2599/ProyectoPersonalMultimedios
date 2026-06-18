@@ -1,0 +1,77 @@
+{
+
+
+
+  
+  "proyectos": [
+    {
+      "id": 1,
+      "titulo": "Scrum Poker",
+      "tituloEn": "Scrum Poker",
+      "descripcion": "Aplicación colaborativa de estimación ágil (planning poker): los equipos votan en tiempo real los puntos de cada historia de usuario. Construida con Vue 3 y Vite, con Firebase Realtime Database para la sincronización en vivo entre participantes.",
+      "descripcionEn": "Collaborative agile estimation app (planning poker): teams vote story points in real time. Built with Vue 3 and Vite, using Firebase Realtime Database for live sync across participants.",
+      "imagen": "scrum-poker.jpg",
+      "categoria": "Vue + Firebase",
+      "enlace": "https://cavalari2599.github.io/Scrum-Poker/#/",
+      "enlaceTexto": ""
+    },
+    {
+      "id": 2,
+      "titulo": "Guía Turística de Costa Rica",
+      "tituloEn": "Costa Rica Tourism Guide",
+      "descripcion": "Proyecto en equipo (5 personas): guía de los destinos de Costa Rica por región, con mapa, galerías y audio-guías, en Web Components nativos (Custom Elements y Shadow DOM) sobre Vite. Mi aporte: el componente de galería de imágenes y el mapa interactivo, además de la carga de los recursos gráficos.",
+      "descripcionEn": "Team project (5 people): guide to Costa Rica's destinations by region, with a map, galleries and audio guides, built with native Web Components (Custom Elements and Shadow DOM) on Vite. My contribution: the image gallery component and the interactive map, plus the loading of graphic assets.",
+      "imagen": "guia-turistica.jpg",
+      "categoria": "Web Components",
+      "enlace": "https://naillel.github.io/proyecto-guia-turistica-vite/",
+      "enlaceTexto": ""
+    },
+    {
+      "id": 3,
+      "titulo": "BovWeight",
+      "tituloEn": "BovWeight",
+      "descripcion": "Sistema que estima el peso de ganado bovino a partir de fotografías, usando un modelo de machine learning. Como no se despliega en línea (corre en local), incluyo un video de demostración.",
+      "descripcionEn": "System that estimates cattle weight from photographs using a machine learning model. Since it isn't deployed online (it runs locally), I include a demo video.",
+      "imagen": "bovweight.jpeg",
+      "categoria": "Machine Learning",
+      "enlace": "",
+      "enlaceTexto": "",
+      "video": "demo.mp4"
+    }
+  ],
+
+ "cv": "CV.pdf", 
+
+  "tecnologias": [
+    { "nombre": "HTML",         "icono": "devicon-html5-plain colored" },
+    { "nombre": "CSS",          "icono": "devicon-css3-plain colored" },
+    { "nombre": "JavaScript",   "icono": "devicon-javascript-plain colored" },
+    { "nombre": "PHP",          "icono": "devicon-php-plain colored" },
+    { "nombre": "Laravel",      "icono": "devicon-laravel-plain colored" },
+    { "nombre": "Node.js",      "icono": "devicon-nodejs-plain colored" },
+    { "nombre": "ASP.NET Core", "icono": "devicon-dotnetcore-plain colored" },
+    { "nombre": ".NET",         "icono": "devicon-dot-net-plain colored" },
+    { "nombre": "C#",           "icono": "devicon-csharp-plain colored" },
+    { "nombre": "Java",         "icono": "devicon-java-plain colored" },
+    { "nombre": "Python",       "icono": "devicon-python-plain colored" },
+    { "nombre": "MySQL",        "icono": "devicon-mysql-plain colored" },
+    { "nombre": "PostgreSQL",   "icono": "devicon-postgresql-plain colored" },
+    { "nombre": "Docker",       "icono": "devicon-docker-plain colored" },
+    { "nombre": "AWS",          "icono": "devicon-amazonwebservices-plain colored" },
+    { "nombre": "Azure",        "icono": "devicon-azure-plain colored" },
+    { "nombre": "Git",          "icono": "devicon-git-plain colored" },
+    { "nombre": "GitHub",       "icono": "devicon-github-original colored" },
+    { "nombre": "VS Code",      "icono": "devicon-vscode-plain colored" },
+    { "nombre": "Visual Studio","icono": "devicon-visualstudio-plain colored" },
+    { "nombre": "Scrum",        "icono": "devicon-jira-plain colored" },
+    { "nombre": "Excel",        "icono": "devicon-windows8-original colored" },
+    { "nombre": "Linux",        "icono": "devicon-linux-plain colored" },
+    { "nombre": "Entity Framework", "icono": "devicon-dot-net-plain colored" }
+  ],
+  "contacto": {
+  "email": "carlos.cavalari@ucr.ac.cr",
+  "linkedin": "https://www.linkedin.com/in/cavalaridaniel",
+  "github": "https://github.com/Cavalari2599"
+}
+}
+  
