@@ -25,6 +25,18 @@
       "categoria": "Web Components",
       "enlace": "https://naillel.github.io/proyecto-guia-turistica-vite/",
       "enlaceTexto": ""
+    },
+    {
+      "id": 3,
+      "titulo": "BovWeight",
+      "tituloEn": "BovWeight",
+      "descripcion": "Sistema que estima el peso de ganado bovino a partir de fotografías, usando un modelo de machine learning. Como no se despliega en línea (corre en local), incluyo un video de demostración.",
+      "descripcionEn": "System that estimates cattle weight from photographs using a machine learning model. Since it isn't deployed online (it runs locally), I include a demo video.",
+      "imagen": "bovweight.jpeg",
+      "categoria": "Machine Learning",
+      "enlace": "",
+      "enlaceTexto": "",
+      "video": "demo.mp4"
     }
   ],
 

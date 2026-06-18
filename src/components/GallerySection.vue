@@ -35,6 +35,36 @@ function imagenUrl(nombre) {
   return new URL(`../assets/images/${nombre}`, import.meta.url).href
 }
 
+// Proyectos sin demo en vivo (p. ej. el de ML, que corre en local) muestran
+// un video local; Vite lo resuelve y hashea igual que las imágenes.
+function videoUrl(nombre) {
+  return new URL(`../assets/video/${nombre}`, import.meta.url).href
+}
+
+// ── Modal de video de demostración ────────────────────────────
+// Se reproduce dentro de la página (en un <dialog>) en vez de abrir el
+// archivo suelto: así el usuario puede cerrarlo y seguir navegando.
+const dialogVideo = ref(null)
+const videoSrc = ref('')
+
+function abrirVideo(proyecto) {
+  videoSrc.value = videoUrl(proyecto.video)
+  dialogVideo.value?.showModal()
+}
+
+function cerrarVideo() {
+  const dlg = dialogVideo.value
+  if (!dlg) return
+  dlg.querySelector('video')?.pause()
+  if (dlg.open) dlg.close()
+  videoSrc.value = ''
+}
+
+// Clic en la zona oscura (no en el contenido) cierra el modal.
+function onBackdropClick(evento) {
+  if (evento.target === dialogVideo.value) cerrarVideo()
+}
+
 function mostrarImagen(proyecto) {
   return Boolean(proyecto.imagen) && !imagenesFallidas.value.has(proyecto.id)
 }
@@ -132,7 +162,7 @@ function onImgError(id) {
               <h3>{{ locale === 'es' ? proyecto.titulo : proyecto.tituloEn }}</h3>
               <p>{{ locale === 'es' ? proyecto.descripcion : proyecto.descripcionEn }}</p>
 
-              <!-- Enlace externo opcional (video/demo/repo) -->
+              <!-- Demo en vivo: abre el sitio en otra pestaña -->
               <a
                 v-if="proyecto.enlace"
                 class="tarjeta-enlace"
@@ -143,6 +173,16 @@ function onImgError(id) {
                 {{ proyecto.enlaceTexto || t.verDemo }}
                 <ion-icon name="open-outline" aria-hidden="true"></ion-icon>
               </a>
+              <!-- Video local: se reproduce en un modal dentro de la página -->
+              <button
+                v-else-if="proyecto.video"
+                type="button"
+                class="tarjeta-enlace"
+                @click="abrirVideo(proyecto)"
+              >
+                {{ proyecto.enlaceTexto || t.verVideo }}
+                <ion-icon name="play-outline" aria-hidden="true"></ion-icon>
+              </button>
             </div>
           </div>
         </article>
@@ -150,6 +190,21 @@ function onImgError(id) {
       </div>
 
       <p v-if="!cargando && proyectosFiltrados.length === 0" class="vacio" role="status">{{ t.vacio }}</p>
+
+      <!-- Modal de video (demo local). <dialog> da Escape y foco gratis. -->
+      <dialog ref="dialogVideo" class="video-modal" @click="onBackdropClick" @close="cerrarVideo">
+        <button class="modal-cerrar" type="button" :aria-label="t.cerrar" @click="cerrarVideo">
+          <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
+        </button>
+        <video
+          v-if="videoSrc"
+          :src="videoSrc"
+          class="modal-video"
+          controls
+          autoplay
+          playsinline
+        ></video>
+      </dialog>
     </div>
   </section>
 </template>
@@ -388,6 +443,53 @@ function onImgError(id) {
 }
 
 .vacio { margin-top: 2rem; text-align: center; color: var(--color-muted); }
+
+/* ── Modal de video de demostración ── */
+.video-modal {
+  margin: auto;
+  max-width: 100vw;
+  max-height: 100vh;
+  padding: 0;
+  border: none;
+  background: transparent;
+  overflow: visible;
+}
+.video-modal::backdrop {
+  background: rgb(0 0 0 / 0.85);
+  backdrop-filter: blur(4px);
+}
+.modal-video {
+  display: block;
+  max-width: 92vw;
+  /* deja aire para el botón de cerrar */
+  max-height: 86vh;
+  border-radius: var(--radius);
+  background: #14151a;
+}
+.modal-cerrar {
+  position: absolute;
+  top: -0.75rem;
+  right: -0.75rem;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-surface2);
+  color: var(--color-text);
+  font-size: 1.3rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.modal-cerrar:hover { background: var(--sunset-orange); color: #fff; }
+.modal-cerrar:active { transform: scale(0.92); }
+.modal-cerrar:focus-visible {
+  outline: 2px solid var(--sunset-orange);
+  outline-offset: 2px;
+}
 
 /* ── Accesibilidad: sin volteo 3D ni shimmer perpetuo con reduced-motion.
    En su lugar, la cara trasera aparece con un fundido. ── */
